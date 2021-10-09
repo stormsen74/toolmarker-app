@@ -19,7 +19,7 @@ const Container = styled.div`
   flex-direction: column;
 `
 
-export default function Recorder() {
+export default function Recorder({ itemID, active, onUploadReady }) {
   const [recordState, setRecordState] = useState(null)
   const [audioData, setAudioData] = useState(null)
   const database_url = appStates(state => state.database_url)
@@ -42,34 +42,30 @@ export default function Recorder() {
   }
 
   const uploadFile = async () => {
+    // TODO => unique filename
     const file = new File([audioData.blob], 'recording.wav')
-
-    console.log('audioData.blob', audioData.blob)
-    console.log('formData', file)
-
     const formData = new FormData()
-    // formData.append('files', audioData);
     formData.append('files', file)
 
     axios
-      .post(database_url + '/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      .post(database_url + '/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
       .then(response => {
+        console.log('upload ...', database_url, response)
+
         const id = response.data[0].id
-        // console.log('upload ...', database_url, response, id)
 
         axios
-          .put(database_url + '/tools/1', { spoken: id })
+          .put(database_url + '/tools/' + itemID, { spoken: id })
           .then(response => {
             console.log('👍', response)
+            onUploadReady()
           })
           .catch(error => {
             console.log('e:', error)
           })
       })
       .catch(error => {
-        console.log('uploadError: ', error)
+        //handle error
       })
   }
 
@@ -80,9 +76,6 @@ export default function Recorder() {
       <div>
         <button id="record" onClick={start}>
           Start
-        </button>
-        <button id="pause" onClick={pause}>
-          Pause
         </button>
         <button id="stop" onClick={stop}>
           Stop

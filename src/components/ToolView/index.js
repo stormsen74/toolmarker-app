@@ -4,6 +4,7 @@ import axios from 'axios'
 import { appStates } from '../../services/appStates'
 import styled from 'styled-components'
 import Upload from '../Upload'
+import Recorder from '../Recorder'
 
 function useQuery() {
   return new URLSearchParams(useLocation().search)
@@ -46,6 +47,7 @@ export default function ToolView() {
 
         setTitle(response.data.title)
         setImageSrc(response.data.image ? database_url + response.data.image.url : null)
+        setSpokenSrc(response.data.spoken ? database_url + response.data.spoken.url : null)
       })
       .catch(error => {
         console.log('e:', error)
@@ -56,8 +58,13 @@ export default function ToolView() {
     getItem(id)
   }, [id])
 
-  const onUploadReady = () => {
-    console.log('onUploadReady!')
+  const onImageUploadReady = () => {
+    console.log('onImageUploadReady!')
+    getItem(id)
+  }
+
+  const onSoundUploadReady = () => {
+    console.log('onSoundUploadReady!')
     getItem(id)
   }
 
@@ -67,6 +74,8 @@ export default function ToolView() {
 
   const toggleImageSelect = () => {}
 
+  console.log(spokenSrc)
+
   return (
     <>
       {/*<EditableInput currentText={title} itemID={id} />*/}
@@ -74,7 +83,11 @@ export default function ToolView() {
       <div>{title}</div>
       <Image onLoad={handleImageLoaded} ref={imageRef} src={imageSrc} />
       <ImagePlacer src={imageSrc} />
-      <Upload itemID={id} active={true} onUploadReady={onUploadReady} />
+
+      <Upload itemID={id} active={true} onUploadReady={onImageUploadReady} />
+      <Recorder itemID={id} active={true} onUploadReady={onSoundUploadReady} />
+
+      <audio id="audio" controls src={spokenSrc} />
     </>
   )
 }
